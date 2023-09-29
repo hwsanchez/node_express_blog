@@ -1,10 +1,15 @@
 const express = require("express");
-const path = require("path");
 const app = new express();
 app.use(express.static("public"));
 
-// for saving posts:
-const BlogPost = require("./models/BlogPost.js");
+// registering the route controllers:
+const storeUserController = require("./controllers/storeUser")
+const newPostController = require("./controllers/newPost");
+const newUserController = require("./controllers/newUser");
+const homeController = require("./controllers/home");
+const storePostController = require("./controllers/storePosts");
+const getPostController = require("./controllers/getPosts");
+
 
 // body parsing middleware to enable getting the form data
 //via req.body attribute:
@@ -27,64 +32,21 @@ app.set("view engine", "ejs");
 const fileUpload = require("express-fileupload");
 app.use(fileUpload());
 
-app.get("/", async (req, res) => {
-  const blogposts = await BlogPost.find({});
-  // Previously, we responded like this to a get request:
-  // res.sendFile(path.resolve(__dirname, 'pages/index.html'))
+app.use("/posts/store", storePostController);
 
-  // Now with EJS:
-  res.render("index", { blogposts: blogposts });
-  console.log(blogposts);
-});
+app.get("/", homeController);
+// Previously, we responded like this to a get request:
+// res.sendFile(path.resolve(__dirname, 'pages/index.html'))
 
-app.get("/about", (req, res) => {
-  // res.sendFile(path.resolve(__dirname, 'pages/about.html'))
-  res.render("about");
-});
+app.get("/post/:id", getPostController);
 
-app.get("/contact", (req, res) => {
-  // res.sendFile(path.resolve(__dirname, 'pages/contact.html'))
-  res.render("contact");
-});
 
-app.get("/post/:id", async (req, res) => {
-  // res.sendFile(path.resolve(__dirname, 'pages/post.html'))
-  const blogpost = await BlogPost.findById(req.params.id);
-  res.render("post", { blogpost });
-  console.log(req.params);
-});
 
-app.get("/posts/new", (req, res) => {
-  res.render("create");
-});
+app.get("/posts/new", newPostController);
 
-//Saving documents in the MongoDB:
+app.get("/auth/register", newUserController);
 
-//app.post("/posts/store", (req, res) => {
-// console.log(req.body); we have all form input in req.body object
-
-// BlogPost.create(req.body)
-//   .then((blogpost) => {
-// res.redirect("/"); this redirect the app to home after form input
-// })
-// .catch((error) => {
-//   console.error(error);
-// });
-
-// console.log('Titulo: ' + req.body.title) you can also access individual
-// console.log('Descripcion: ' + req.body.body)
-// });
-
-// more elegant way using async function:
-app.post("/posts/store", async (req, res) => {
-  //Here image is the same name from the form input in create.ejs:
-  let image = req.files.image;
-  image.mv(path.resolve(__dirname, "public/img", image.name), async (error) => {
-    await BlogPost.create({...req.body, image: '/img/' + image.name});
-    console.log(req.body);
-    res.redirect("/");
-  });
-});
+app.post("/users/register", storeUserController);
 
 app.listen(4000, () => {
   console.log("Listening on port 4000...");
