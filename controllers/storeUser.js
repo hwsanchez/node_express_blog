@@ -6,6 +6,7 @@ module.exports = async (req, res) => {
     await User.create(req.body);
     res.redirect("/");
   } catch (error) {
-    next(error); //Let the error propagate to the global error handler middleware
+    console.log("There was an error creating the user: " + error)
+    res.redirect("/auth/register");
   }
 };
