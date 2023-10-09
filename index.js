@@ -1,4 +1,15 @@
 const express = require("express");
+// Connecting to MongoDB from Node:
+//We define a connection with with mongoose.connect that takes
+//the parameters: host and database name. If the Database doesnt exists Mongo will create a new one automatically!
+//To define a model(collections in our database) we create a 'models' folder
+//in our app directory (BlogPost.js)
+const mongoose = require("mongoose");
+mongoose.connect(
+  "mongodb+srv://hwsanchez:J5KSZ6rYKKx6mOi7@cluster0.dkiaorb.mongodb.net/",
+  { useNewUrlParser: true }
+);
+
 const app = new express();
 app.use(express.static("public"));
 
@@ -15,6 +26,10 @@ const expressSession = require("express-session");
 const authMiddleware = require("./middleware/authMiddleware");
 const redirectIfAuthenticatedMiddleware =
   require('./middleware/redirectIfAuthenticatedMiddleware');
+const logoutController = require('./controllers/logout');
+const flash = require('connect-flash');
+
+app.use(flash());
 
 
 
@@ -41,13 +56,7 @@ app.use("*", (req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Connecting to MongoDB from Node:
-//We define a connection with with mongoose.connect that takes
-//the parameters: host and database name. If the Database doesnt exists Mongo will create a new one automatically!
-//To define a model(collections in our database) we create a 'models' folder
-//in our app directory (BlogPost.js)
-const mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost/my_database", { useNewUrlParser: true });
+
 
 // importing templating Engine: EJS
 const ejs = require("ejs");
@@ -83,6 +92,11 @@ app.post(
   loginUserController
 );
 
-app.listen(4000, () => {
-  console.log("Listening on port 4000...");
+app.get("/auth/logout", logoutController);
+
+app.use((req, res) => res.render('notfound'));
+
+const port = process.env.PORT || 4000;
+app.listen(port, () => {
+  console.log(`Listening on port ${port}...`);
 });
