@@ -5,10 +5,7 @@ const express = require("express");
 //To define a model(collections in our database) we create a 'models' folder
 //in our app directory (BlogPost.js)
 const mongoose = require("mongoose");
-mongoose.connect(
-  "mongodb+srv://hwsanchez:J5KSZ6rYKKx6mOi7@cluster0.dkiaorb.mongodb.net/",
-  { useNewUrlParser: true }
-);
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 
 const app = new express();
 app.use(express.static("public"));
